@@ -1,0 +1,21 @@
+# Ignore all .log files
+*.log
+
+# Directory ignore
+/data_pref_name_img/
+/data_pref_name_img/
+/model_save/
+/badass/
+
+#txt files
+old_to_find.txt
+target_test_data.txt
+target_train_data.txt
+test_font_import.txt
+train_target.txt
+new_ds_maybe.txt
+
+#py files
+test_font_import.py
+test_webdrive.py
+

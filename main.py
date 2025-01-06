@@ -20,12 +20,24 @@ link_0 = "https://www.rdv-prefecture.interieur.gouv.fr/rdvpref/reservation/demar
 load_dotenv()
 
 #email configuration
-expediteur = os.getenv("EMAIL_EXPEDITEUR")
-mot_de_passe = os.getenv("EMAIL_PASSWORD")
-destinataire = os.getenv("EMAIL_DESTINATAIRE")
-# GMX SMTP Server details
-SMTP_SERVER = 'mail.gmx.com'
-SMTP_PORT = 465
+smtp_server = 'smtp.ethereal.email'
+smtp_port = 587
+smtp_user = os.getenv("EMAIL_EXPEDITEUR")
+smtp_password = os.getenv("EMAIL_PASSWORD")
+# Email content
+sender_email = os.getenv("EMAIL_EXPEDITEUR")
+receiver_email = os.getenv("EMAIL_DESTINATAIRE")
+subject = 'Test Email'
+body = 'This is a test email sent via Ethereal server using Python.'
+
+# Create the email message
+message = MIMEMultipart()
+message['From'] = sender_email
+message['To'] = receiver_email
+message['Subject'] = subject
+
+# Attach the body to the email
+message.attach(MIMEText(body, 'plain'))
 
 img_name = "captchaFR_CaptchaImage"
 
@@ -112,23 +124,16 @@ while no_rendez_vous:
     try:
         rendez_vous = driver.find_element(By.XPATH, "//*[text()='Choisissez votre créneau']")
 
-        # Création du message
-        subject = "Alert rendez-vous available"
-        body_message = "Bonjour,\n\nRendez-vous disponible pour la préfecture !!.\n\nCordialement."
-        message = MIMEMultipart()
-        message["From"] = expediteur
-        message["To"] = destinataire
-        message["Subject"] = subject
-        message.attach(MIMEText(body_message, "plain"))
         try:
-            with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT) as serveur:
-                serveur.set_debuglevel(1)
-                serveur.login(expediteur, mot_de_passe)
-                serveur.sendmail(expediteur, destinataire, message.as_string())
-            no_rendez_vous = False
-            print("E-mail send with success !")
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()  # Secure connection
+            server.login(smtp_user, smtp_password)
+            server.sendmail(sender_email, receiver_email, message.as_string())
+            print('Email sent successfully!')
         except Exception as e:
-            print(f"E-mail not send : {e}")
+            print(f'Error sending email: {e}')
+        finally:
+            server.quit()
     except NoSuchElementException:
         print("No rendez-vous available")
         driver.refresh()
